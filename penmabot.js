@@ -29,6 +29,7 @@ fs.readFile('./bot_secret_token', 'utf8' , (err, token) => {
 const settings = { method: "Get" };
 const fetchTrigger = "!bonk";
 const slutTrigger = "!slut";
+const rankingTrigger = '!ranking';
 
 const colors = {
 	p1: '#28b4c8',
@@ -77,6 +78,10 @@ client.on('message', (message) => {
 
 	if (message.content.includes(slutTrigger)) {
 		handleSlut(message);
+	}
+
+	if (message.content === rankingTrigger) {
+		getRanking(message);
 	}
 })
 
@@ -234,11 +239,9 @@ handleSlut = async (message) => {
 			let slutPercentage;
 
 			if (!user) {
-				console.log('no user found');
 				slutPercentage = getSlutPercentage();
 				insertUser(serverId, userId, slutPercentage);
 			} else {
-				console.log('USER:', user);
 				slutPercentage = user.percentage;
 			}
 			
@@ -248,8 +251,6 @@ handleSlut = async (message) => {
 
 getUser = async (serverId, userId) => {
 	const collection = mongoClient.db("penmabot").collection("slut");
-
-	console.log('retrieving user...');
 	const user = await collection.findOne({serverId, userId});
 
 	return user;
@@ -257,7 +258,27 @@ getUser = async (serverId, userId) => {
 
 insertUser = async (serverId, userId, slutPercentage) => {
 	const collection = mongoClient.db("penmabot").collection("slut");
-
-	console.log('inserting user...');
 	await collection.insertOne({serverId, userId, percentage: slutPercentage});
+}
+
+getRanking = async (message) => {
+	const users = await getOrderedUsers(message.guild.id);
+
+	let rankString = `${message.guild.name} slut ranking:\n\n`;
+
+	if (users) {
+		await users.forEach( async (user, index) => {
+			const fetchedUser = await client.users.fetch(user.userId);
+			rankString += `${index + 1}: ${fetchedUser.username} (${user.percentage}%)\n`;
+		});
+	
+		message.channel.send('\`' + rankString + '\`');
+	} 
+}
+
+getOrderedUsers = async (serverId) => {	
+	const collection = mongoClient.db("penmabot").collection("slut");
+	const users = await collection.find({serverId}).sort({percentage: 1}).limit(10).toArray();
+
+	return users;
 }
