@@ -5,6 +5,7 @@
   "main": "penmabot.js",
   "dependencies": {
     "discord.js": "^12.5.1",
+    "mongodb": "^3.6.6",
     "node-fetch": "^2.6.1",
     "quickchart-js": "^1.0.7"
   },

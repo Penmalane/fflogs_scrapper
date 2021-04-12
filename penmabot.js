@@ -3,6 +3,10 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 const client = new Discord.Client();
 const { MessageAttachment } = require('discord.js');
+const MongoClient = require('mongodb').MongoClient;
+
+const uri = "mongodb+srv://penma:penmalane@cluster0.naf6i.mongodb.net/penmabot?retryWrites=true&w=majority";
+const mongoClient = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 let fflogsApiKey;
 
@@ -37,8 +41,11 @@ const colors = {
 
 let guilds = {};
 
-client.on('ready', () => {
+client.on('ready', async () => {
 	console.log("Connected as " + client.user.tag);
+	
+	await mongoClient.connect();
+	console.log("Connected to the database");
 
 	const guildInfos = client.guilds.cache;
 	
@@ -67,23 +74,9 @@ client.on('message', (message) => {
 	if (message.content === fetchTrigger) {
 		getGlobalChart(message);
 	}
-	if (message.content.includes(slutTrigger)) {
-		let slutPercentage = Math.floor((Math.random() * 100) + 1);
-		const mentionned = message.mentions.users;
 
-		if (mentionned.size) {
-			mentionned.forEach(mention => {
-				if (mention.username === "Mewcy") {
-					slutPercentage = 10000;
-				}
-				message.channel.send(`<@${mention.id}> is ${slutPercentage}% a slut.`);
-			});
-		} else {
-			message.channel.send(`You are ${slutPercentage}% a slut.`);
-		}
-	}
-	if (message.content.includes("oh yeah?")) {
-		message.channel.send(`I hate Haru.`);
+	if (message.content.includes(slutTrigger)) {
+		handleSlut(message);
 	}
 })
 
@@ -214,4 +207,57 @@ getBarColor = (fight) => {
 		case 4:
 			return colors.p4;
 	}
+}
+
+getSlutPercentage = () => {
+    return Math.floor((Math.random() * 100) + 1);
+}
+
+handleSlut = async (message) => {
+	const mentioned = message.mentions.users;
+	const serverId = message.guild.id;
+
+		if (mentioned.size) {
+			mentioned.forEach( async (mention) => {				
+				const user = await getUser(serverId, mention.id);
+
+				if (user) {
+					message.channel.send(`<@${mention.id}> is ${user.percentage}% a slut.`);
+				} else {
+					message.channel.send(`<@${mention.id}> is not yet a slut. They can type !slut to know how much of a slut they are!`)
+				}
+			});
+		} else {
+			const userId = message.author.id;
+
+			const user = await getUser(serverId, userId);
+			let slutPercentage;
+
+			if (!user) {
+				console.log('no user found');
+				slutPercentage = getSlutPercentage();
+				insertUser(serverId, userId, slutPercentage);
+			} else {
+				console.log('USER:', user);
+				slutPercentage = user.percentage;
+			}
+			
+			message.channel.send(`You are ${slutPercentage}% a slut.`);
+		}
+}
+
+getUser = async (serverId, userId) => {
+	const collection = mongoClient.db("penmabot").collection("slut");
+
+	console.log('retrieving user...');
+	const user = await collection.findOne({serverId, userId});
+
+	return user;
+}
+
+insertUser = async (serverId, userId, slutPercentage) => {
+	const collection = mongoClient.db("penmabot").collection("slut");
+
+	console.log('inserting user...');
+	await collection.insertOne({serverId, userId, percentage: slutPercentage});
 }
