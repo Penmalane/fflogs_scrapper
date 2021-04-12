@@ -24,6 +24,7 @@ fs.readFile('./bot_secret_token', 'utf8' , (err, token) => {
 
 const settings = { method: "Get" };
 const fetchTrigger = "!bonk";
+const slutTrigger = "!slut";
 
 const colors = {
 	p1: '#28b4c8',
@@ -61,10 +62,28 @@ client.on('message', (message) => {
 			.then((data) => {
 			   handleData(data.fights, message);
 			})  
-	} else {
-		if (message.content === fetchTrigger) {
-			getGlobalChart(message);
+	} 
+
+	if (message.content === fetchTrigger) {
+		getGlobalChart(message);
+	}
+	if (message.content.includes(slutTrigger)) {
+		let slutPercentage = Math.floor((Math.random() * 100) + 1);
+		const mentionned = message.mentions.users;
+
+		if (mentionned.size) {
+			mentionned.forEach(mention => {
+				if (mention.username === "Mewcy") {
+					slutPercentage = 10000;
+				}
+				message.channel.send(`<@${mention.id}> is ${slutPercentage}% a slut.`);
+			});
+		} else {
+			message.channel.send(`You are ${slutPercentage}% a slut.`);
 		}
+	}
+	if (message.content.includes("oh yeah?")) {
+		message.channel.send(`I hate Haru.`);
 	}
 })
 
