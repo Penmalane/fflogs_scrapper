@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 const client = new Discord.Client();
 const { MessageAttachment } = require('discord.js');
 const MongoClient = require('mongodb').MongoClient;
+const cron = require('node-cron');
 
 const uri = "mongodb+srv://penma:penmalane@cluster0.naf6i.mongodb.net/penmabot?retryWrites=true&w=majority";
 const mongoClient = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -30,6 +31,11 @@ const settings = { method: "Get" };
 const fetchTrigger = "!bonk";
 const slutTrigger = "!slut";
 const rankingTrigger = '!ranking';
+const slutRetryTrigger = "!reslut";
+const questionTrigger = "!question";
+
+const slutMaxRetry = 3;
+const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
 
 const colors = {
 	p1: '#28b4c8',
@@ -82,6 +88,14 @@ client.on('message', (message) => {
 
 	if (message.content === rankingTrigger) {
 		getRanking(message);
+	}
+
+	if (message.content === slutRetryTrigger) {
+		retrySlut(message);
+	}
+
+	if (message.content.includes(questionTrigger)) {
+		question(message);
 	}
 })
 
@@ -245,20 +259,24 @@ handleSlut = async (message) => {
 				slutPercentage = user.percentage;
 			}
 			
-			message.channel.send(`You are ${slutPercentage}% a slut.`);
+			let sentMessage = `You are ${slutPercentage}% a slut\n\n`;
+			user && user.slutRetry ? 
+				sentMessage += `You have ${user.slutRetry} retries remaining for today.\nType ${slutRetryTrigger} to retry!` :
+				sentMessage += noRetryMessage;
+			message.channel.send(sentMessage);
 		}
 }
 
 getUser = async (serverId, userId) => {
-	const collection = mongoClient.db("penmabot").collection("slut");
-	const user = await collection.findOne({serverId, userId});
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+	const user = await slutCollection.findOne({serverId, userId});
 
 	return user;
 }
 
 insertUser = async (serverId, userId, slutPercentage) => {
-	const collection = mongoClient.db("penmabot").collection("slut");
-	await collection.insertOne({serverId, userId, percentage: slutPercentage});
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+	await slutCollection.insertOne({serverId, userId, percentage: slutPercentage, slutRetry: slutMaxRetry});
 }
 
 getRanking = async (message) => {
@@ -277,8 +295,51 @@ getRanking = async (message) => {
 }
 
 getOrderedUsers = async (serverId) => {	
-	const collection = mongoClient.db("penmabot").collection("slut");
-	const users = await collection.find({serverId}).sort({percentage: 1}).limit(10).toArray();
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+	const users = await slutCollection.find({serverId}).sort({percentage: -1}).limit(10).toArray();
 
 	return users;
 }
+
+retrySlut = async (message) => {
+	const updatedUser = await updateUser(message.guild.id, message.author.id);
+
+	if (updatedUser.lastErrorObject.n) {
+		let sentMessage = `You are ${updatedUser.value.percentage}% a slut.\n`;
+		const retryString = updatedUser.value.slutRetry === 1 ? "retry" : "retries";
+
+		updatedUser.value.slutRetry ?
+			sentMessage += `You have ${updatedUser.value.slutRetry} ${retryString} remaining for today.` :
+			sentMessage += noRetryMessage;
+
+		message.channel.send(sentMessage);
+	} else {
+		message.channel.send(noRetryMessage)
+	}
+}
+
+updateUser = async (serverId, userId) => {
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+	const updatedUser = await slutCollection.findOneAndUpdate(
+		{ serverId: serverId, userId: userId, slutRetry: { $gt: 0 } },
+		{ $inc : { slutRetry : -1 }, $set: { percentage: getSlutPercentage() } },
+		{ returnOriginal: false }
+	);
+
+	return updatedUser;
+}
+
+question = (message) => {
+	const answer = (Math.random() < 0.5);
+	const answerMessage = answer ? 'yes i do think so' : 'no i don\'t think so';
+
+	message.channel.send(answerMessage);
+}
+
+cron.schedule('0 0 * * *', () => {	
+	console.log('resetting retries...');
+
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+	slutCollection.updateMany({}, {$set: {slutRetry: slutMaxRetry}});	
+	slutCollection.updateMany({percentage: {$gt: 0}}, {$inc: {percentage: -1}});
+});
