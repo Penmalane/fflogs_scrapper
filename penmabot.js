@@ -282,16 +282,21 @@ insertUser = async (serverId, userId, slutPercentage) => {
 getRanking = async (message) => {
 	const users = await getOrderedUsers(message.guild.id);
 
-	let rankString = `${message.guild.name} slut ranking:\n\n`;
+	let rankString = '';
 
 	if (users) {
 		await users.forEach( async (user, index) => {
 			const fetchedUser = await client.users.fetch(user.userId);
 			rankString += `${index + 1}: ${fetchedUser.username} (${user.percentage}%)\n`;
 		});
-	
-		message.channel.send('\`' + rankString + '\`');
-	} 
+
+		const rankingEmbed = new Discord.MessageEmbed()
+			.setColor('#b983f7')
+			.setTitle(`${message.guild.name} slut ranking`)
+			.setDescription(rankString)
+
+		message.channel.send(rankingEmbed);
+	}
 }
 
 getOrderedUsers = async (serverId) => {	
