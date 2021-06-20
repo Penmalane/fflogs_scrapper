@@ -33,6 +33,7 @@ const slutTrigger = "!slut";
 const rankingTrigger = '!ranking';
 const slutRetryTrigger = "!reslut";
 const questionTrigger = "!question";
+const lowerTrigger = "!lower";
 
 const slutMaxRetry = 3;
 const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
@@ -96,6 +97,10 @@ client.on('message', (message) => {
 
 	if (message.content.includes(questionTrigger)) {
 		question(message);
+	}
+
+	if (message.content.includes(lowerTrigger)) {
+		lowerScore(message);
 	}
 })
 
@@ -326,7 +331,7 @@ retrySlut = async (message) => {
 updateUser = async (serverId, userId) => {
 	const slutCollection = mongoClient.db("penmabot").collection("slut");
 	const updatedUser = await slutCollection.findOneAndUpdate(
-		{ serverId: serverId, userId: userId, slutRetry: { $gt: 0 } },
+		{ serverId, userId, slutRetry: { $gt: 0 } },
 		{ $inc : { slutRetry : -1 }, $set: { percentage: getSlutPercentage() } },
 		{ returnOriginal: false }
 	);
@@ -339,6 +344,53 @@ question = (message) => {
 	const answerMessage = answer ? 'yes i do think so' : 'no i don\'t think so';
 
 	message.channel.send(answerMessage);
+}
+
+lowerScore = async (message) => {
+	const userTargeted = message.content.split(' ')[1];
+
+	if ( userTargeted ) {
+		let userFound = false;
+
+		const attacker = await getUser(message.guild.id, message.author.id);
+
+		if (attacker.percentage === 0) {
+			message.channel.send('You have no reslut remaining. You cannot lower someone\'s score');
+		} else {
+			message.channel.members.forEach(member => {
+				if (userTargeted === `${member.user.username}#${member.user.discriminator}`) {
+					userFound = true;
+					lowerTargetScore(message.guild.id, member.user.id);
+					lowerAttackerResluts(message.guild.id, message.author.id);
+					message.channel.send(`${member.user.username}'s percentage lowered by 1%!\nReslut(s) left: ${attacker.slutRetry - 1}`);
+				}
+			});
+		
+			if (!userFound) {
+				message.channel.send('User not found. Correct command is `lower Username#XXXX`');
+			}			
+		}
+	} else {
+		message.channel.send('Correct command is `lower Username#XXXX`');
+	}
+}
+
+lowerTargetScore = async (serverId, userId) => {
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+
+	await slutCollection.findOneAndUpdate(
+		{ serverId, userId, percentage: { $gt: 0 } },
+		{ $inc : { percentage : -1 } }
+	);
+}
+
+lowerAttackerResluts = async (serverId, userId) => {
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+
+	await slutCollection.findOneAndUpdate(
+		{ serverId, userId },
+		{ $inc : { slutRetry : -1 } }
+	);
 }
 
 cron.schedule('0 0 * * *', () => {	
