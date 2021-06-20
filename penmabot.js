@@ -354,7 +354,9 @@ lowerScore = async (message) => {
 
 		const attacker = await getUser(message.guild.id, message.author.id);
 
-		if (attacker.retrySlut === 0) {
+		console.log(attacker);
+
+		if (attacker.slutRetry <= 0) {
 			message.channel.send('You have no reslut remaining. You cannot lower someone\'s score');
 		} else {
 			message.channel.members.forEach(member => {
