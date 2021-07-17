@@ -100,7 +100,7 @@ client.on('message', (message) => {
 	}
 
 	if (message.content.includes(lowerTrigger)) {
-		lowerScore(message);
+		//lowerScore(message);
 	}
 })
 
