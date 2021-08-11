@@ -102,6 +102,10 @@ client.on('message', (message) => {
 	if (message.content.includes(lowerTrigger)) {
 		//lowerScore(message);
 	}
+
+	if (message.content.toLowerCase().includes("dn")) {
+		message.channel.send("deez nuts lmao");
+	}
 })
 
 handleData = (fights, message) => {
