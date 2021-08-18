@@ -103,7 +103,7 @@ client.on('message', (message) => {
 		//lowerScore(message);
 	}
 
-	if (message.content.toLowerCase().includes("dn")) {
+	if (message.content.toLowerCase().includes("dn") && message.channel.name.includes('bot')) {
 		message.channel.send("deez nuts lmao");
 	}
 })
@@ -260,16 +260,18 @@ handleSlut = async (message) => {
 
 			const user = await getUser(serverId, userId);
 			let slutPercentage;
+			let hasBeenInserted = false;
 
 			if (!user) {
 				slutPercentage = getSlutPercentage();
 				insertUser(serverId, userId, slutPercentage);
 			} else {
 				slutPercentage = user.percentage;
+				hasBeenInserted = true;
 			}
 			
 			let sentMessage = `You are ${slutPercentage}% a slut\n\n`;
-			user && user.slutRetry ? 
+			user && user.slutRetry && !hasBeenInserted ? 
 				sentMessage += `You have ${user.slutRetry} retries remaining for today.\nType ${slutRetryTrigger} to retry!` :
 				sentMessage += noRetryMessage;
 			message.channel.send(sentMessage);
