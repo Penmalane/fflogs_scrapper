@@ -202,7 +202,7 @@ getGlobalChart = (message) => {
 }
 
 isInLogsChannel = (message) => {
-	return (guilds[message.guild.id].id === message.channel.id);
+	return guilds[message.guild.id] ? (guilds[message.guild.id].id === message.channel.id) : false;
 };
 
 isFflogsLink = (message) => {
