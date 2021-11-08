@@ -164,7 +164,7 @@ getGlobalChart = (message) => {
 			let fightUrls = [];
 
 			messages.forEach( (message) => {
-				if (message && message.content && isFflogsLink(message)) {
+				if (message && message.content) {
 					const fightId = getFightId(message.content);
 					const fightUrl = createUrl(fightId);
 					if ( !fightUrls.includes(fightUrl) ) {
