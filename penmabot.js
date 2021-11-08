@@ -112,7 +112,7 @@ client.on('message', (message) => {
 handleData = (fights, message) => {
 	if (fights) {
 		fights = fights.filter((fight) => fight.lastPhaseForPercentageDisplay);
-		fights = fights.filter((fight) => fight.zoneName === "The Epic of Alexander (Ultimate)");
+		fights = fights.filter((fight) => fight.zoneName === "The Epic of Alexander (Ultimate)" || fight.zoneName === "the Unending Coil of Bahamut (Ultimate)" || fight.zoneName === "the Weapon's Refrain (Ultimate)");
 	
 		chartUrl = createChart(fights);
 		const chartImage = new MessageAttachment(chartUrl);
