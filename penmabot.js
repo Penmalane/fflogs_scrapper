@@ -68,7 +68,8 @@ client.on('message', (message) => {
 		return;
 	}
 
-	if(isFflogsLink(message) && isInLogsChannel(message)) {
+	// if(isFflogsLink(message) && isInLogsChannel(message)) {
+	if(isFflogsLink(message)) {
 		const fightId = getFightId(message.content);
 		const apiUrl = createUrl(fightId);
 
