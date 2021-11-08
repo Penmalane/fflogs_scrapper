@@ -80,9 +80,9 @@ client.on('message', (message) => {
 			})  
 	} 
 
-	if (message.content === fetchTrigger) {
+	/*if (message.content === fetchTrigger) {
 		getGlobalChart(message);
-	}
+	}*/
 
 	if (message.content.includes(slutTrigger)) {
 		handleSlut(message);
