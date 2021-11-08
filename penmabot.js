@@ -34,6 +34,7 @@ const rankingTrigger = '!ranking';
 const slutRetryTrigger = "!reslut";
 const questionTrigger = "!question";
 const lowerTrigger = "!lower";
+const chartTrigger = "!chart";
 
 const slutMaxRetry = 3;
 const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
@@ -69,15 +70,8 @@ client.on('message', (message) => {
 	}
 
 	// if(isFflogsLink(message) && isInLogsChannel(message)) {
-	if(isFflogsLink(message)) {
-		const fightId = getFightId(message.content);
-		const apiUrl = createUrl(fightId);
-
-		fetch(apiUrl, settings)
-			.then(res => res.json())
-			.then((data) => {
-			   handleData(data.fights, message);
-			})  
+	if(isFflogsLink(message.content) && !message.content.includes(chartTrigger)) {
+		getFflogsData(message, message.content)
 	} 
 
 	/*if (message.content === fetchTrigger) {
@@ -107,17 +101,63 @@ client.on('message', (message) => {
 	if (message.content.toLowerCase().includes("dn") && message.channel.name.includes('bot')) {
 		message.channel.send("deez nuts lmao");
 	}
+
+	if(message.content.includes(chartTrigger)) {
+		handleIndividualChart(message);
+	}
 })
 
-handleData = (fights, message) => {
+getFflogsData = (message, url, specificFight = null) => {
+	const fightId = getFightId(url);
+	const apiUrl = createUrl(fightId);
+
+	fetch(apiUrl, settings)
+		.then(res => res.json())
+		.then((data) => {
+		   handleData(data.fights, message, specificFight);
+	})
+}
+
+handleIndividualChart = (message) => {
+	const content = message.content.split('!chart ');	
+	try {
+		if (content.length !== 2) {
+			message.channel.send("Correct usage: !chart fflogs_link | name_of_the_fight");
+		} else {
+			const arguments = content[1].split(' | ');
+			if (arguments.length !== 2) {
+				message.channel.send("Correct usage: !chart fflogs_link | name_of_the_fight");
+			} else {
+				if (!isFflogsLink(arguments[0])) {
+					message.channel.send("First argument is not a correct fflogs link");
+				} else {
+					getFflogsData(message, arguments[0], arguments[1]);
+				}
+			}
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+handleData = (fights, message, specificFight = null) => {
 	if (fights) {
-		fights = fights.filter((fight) => fight.lastPhaseForPercentageDisplay);
-		fights = fights.filter((fight) => fight.zoneName === "The Epic of Alexander (Ultimate)" || fight.zoneName === "the Unending Coil of Bahamut (Ultimate)" || fight.zoneName === "the Weapon's Refrain (Ultimate)");
-	
-		chartUrl = createChart(fights);
-		const chartImage = new MessageAttachment(chartUrl);
-		chartImage.setName('chart.png');
-		message.channel.send(chartImage);
+		if (!specificFight)  {
+			fights = fights.filter((fight) => fight.lastPhaseForPercentageDisplay);
+			fights = fights.filter((fight) => fight.zoneName === "The Epic of Alexander (Ultimate)" || fight.zoneName === "the Unending Coil of Bahamut (Ultimate)" || fight.zoneName === "the Weapon's Refrain (Ultimate)");
+		}
+		else fights = fights.filter((fight) => fight.zoneName === specificFight);
+
+		if (fights.length !== 0) {	
+			chartUrl = createChart(fights);
+			const chartImage = new MessageAttachment(chartUrl);
+			chartImage.setName('chart.png');
+			message.channel.send(chartImage);
+		} else {
+			message.channel.send("No fight found");
+		}
+	} else {
+		message.channel.send("No fight found");
 	}
 }
 
@@ -206,12 +246,12 @@ isInLogsChannel = (message) => {
 	return guilds[message.guild.id] ? (guilds[message.guild.id].id === message.channel.id) : false;
 };
 
-isFflogsLink = (message) => {
-	return (message.content.includes('https://www.fflogs.com/reports/'));
+isFflogsLink = (link) => {
+	return (link ? link.includes('https://www.fflogs.com/reports/') : false);
 }
 
 getFightId = (url) => {
-	return url.split('https://www.fflogs.com/reports/')[1].split('/#')[0];
+	return url.split('https://www.fflogs.com/reports/')[1].split('#')[0];
 }
 
 createUrl = (fightId) => {
