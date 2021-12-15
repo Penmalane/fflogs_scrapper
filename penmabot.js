@@ -70,9 +70,9 @@ client.on('message', (message) => {
 	}
 
 	// if(isFflogsLink(message) && isInLogsChannel(message)) {
-	if(isFflogsLink(message.content) && !message.content.includes(chartTrigger)) {
+	/*if(isFflogsLink(message.content) && !message.content.includes(chartTrigger)) {
 		getFflogsData(message, message.content)
-	} 
+	} */
 
 	/*if (message.content === fetchTrigger) {
 		getGlobalChart(message);
