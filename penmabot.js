@@ -35,6 +35,7 @@ const slutRetryTrigger = "!reslut";
 const questionTrigger = "!question";
 const lowerTrigger = "!lower";
 const chartTrigger = "!chart";
+const scaledChartTrigger = "!scaledchart";
 
 const slutMaxRetry = 3;
 const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
@@ -45,6 +46,9 @@ const colors = {
 	p2: '#78d237',
 	p3: '#2d73f5',
 	p4: '#ffd246',
+	p5: '#ecaf81',
+	p6: '#abeaea',
+	p7: '#ead1dc',
 	kill: '#aa46be'
 };
 
@@ -74,9 +78,9 @@ client.on('message', (message) => {
 		getFflogsData(message, message.content)
 	} */
 
-	/*if (message.content === fetchTrigger) {
+	if (message.content === fetchTrigger) {
 		getGlobalChart(message);
-	}*/
+	}
 
 	if (message.content.includes(slutTrigger)) {
 		handleSlut(message);
@@ -105,33 +109,38 @@ client.on('message', (message) => {
 	if(message.content.includes(chartTrigger)) {
 		handleIndividualChart(message);
 	}
+
+	if(message.content.includes(scaledChartTrigger)) {
+		handleIndividualChart(message, true);
+	}
 })
 
-getFflogsData = (message, url, specificFight = null) => {
+getFflogsData = (message, url, specificFight = null, scaled = false) => {
 	const fightId = getFightId(url);
 	const apiUrl = createUrl(fightId);
 
 	fetch(apiUrl, settings)
 		.then(res => res.json())
 		.then((data) => {
-		   handleData(data.fights, message, specificFight);
+		   handleData(data.fights, message, specificFight, scaled);
 	})
 }
 
-handleIndividualChart = (message) => {
-	const content = message.content.split('!chart ');	
+handleIndividualChart = (message, scaled = false) => {
+	const trigger = scaled ? scaledChartTrigger : chartTrigger;
+	const content = message.content.split(`${trigger} `);
 	try {
 		if (content.length !== 2) {
-			message.channel.send("Correct usage: !chart fflogs_link | name_of_the_fight");
+			message.channel.send(`Correct usage: ${trigger} fflogs_link | name_of_the_fight`);
 		} else {
 			const arguments = content[1].split(' | ');
 			if (arguments.length !== 2) {
-				message.channel.send("Correct usage: !chart fflogs_link | name_of_the_fight");
+				message.channel.send(`Correct usage: ${trigger} fflogs_link | name_of_the_fight`);
 			} else {
 				if (!isFflogsLink(arguments[0])) {
 					message.channel.send("First argument is not a correct fflogs link");
 				} else {
-					getFflogsData(message, arguments[0], arguments[1]);
+					getFflogsData(message, arguments[0], arguments[1], scaled);
 				}
 			}
 		}
@@ -140,16 +149,16 @@ handleIndividualChart = (message) => {
 	}
 }
 
-handleData = (fights, message, specificFight = null) => {
+handleData = (fights, message, specificFight = null, scaled = false) => {
 	if (fights) {
 		if (!specificFight)  {
-			fights = fights.filter((fight) => fight.lastPhaseForPercentageDisplay);
-			fights = fights.filter((fight) => fight.zoneName === "The Epic of Alexander (Ultimate)" || fight.zoneName === "the Unending Coil of Bahamut (Ultimate)" || fight.zoneName === "the Weapon's Refrain (Ultimate)");
+			//fights = fights.filter((fight) => fight.lastPhaseForPercentageDisplay);
+			fights = fights.filter((fight) => fight.zoneName === "Dragonsong's Reprise (Ultimate)");
 		}
 		else fights = fights.filter((fight) => fight.zoneName === specificFight);
 
 		if (fights.length !== 0) {	
-			chartUrl = createChart(fights);
+			chartUrl = createChart(fights, scaled);
 			const chartImage = new MessageAttachment(chartUrl);
 			chartImage.setName('chart.png');
 			message.channel.send(chartImage);
@@ -161,41 +170,53 @@ handleData = (fights, message, specificFight = null) => {
 	}
 }
 
-createChart = (fights) => {
+createChart = (fights, scaled = false) => {
 	let myColors= [];
 	let durations = fights.map( (fight) => getFightDuration(fight))
+	let maximumDuration = 18;
 
-	fights.forEach(  (fight, index) => {
-		myColors[index] = getBarColor(fight);
-	});
+	try {
+		if (scaled) {
+			maximumDuration = durations.reduce(function(a, b) {
+				return Math.ceil(Math.max(a, b));
+			}, -Infinity);
 
-	const chart = {
-		type: 'bar',
-		data: {
-		  labels: fights.map( (fight, index) => `${index + 1}`),
-		  datasets: [{
-			label: 'Chart',
-			data: durations,
-			backgroundColor: myColors
-		  }]
-		},
-		options: {
-			scales: {
-				yAxes: [{
-					ticks: {
-					   min: 0,
-					   max: 18,
-					   stepSize: 1
-					}
-				 }]
+		}
+
+		fights.forEach(  (fight, index) => {
+			myColors[index] = getBarColor(fight);
+		});
+	
+		const chart = {
+			type: 'bar',
+			data: {
+			  labels: fights.map( (fight, index) => `${index + 1}`),
+			  datasets: [{
+				label: 'Chart',
+				data: durations,
+				backgroundColor: myColors
+			  }]
+			},
+			options: {
+				scales: {
+					yAxes: [{
+						ticks: {
+						   min: 0,
+						   max: maximumDuration,
+						   stepSize: 1
+						}
+					 }]
+				}
 			}
 		}
-	}
+		
+		const encodedChart = encodeURIComponent(JSON.stringify(chart));
+		const chartUrl = `https://quickchart.io/chart?c=${encodedChart}`;
 	
-	const encodedChart = encodeURIComponent(JSON.stringify(chart));
-	const chartUrl = `https://quickchart.io/chart?c=${encodedChart}`;
-
-	return chartUrl;
+		return chartUrl;
+	} catch(e) {
+		console.log('error: ', e);
+	}
 }
 
 getGlobalChart = (message) => {
@@ -204,7 +225,7 @@ getGlobalChart = (message) => {
 			let fightUrls = [];
 
 			messages.forEach( (message) => {
-				if (message && message.content) {
+				if (message && message.content && isFflogsLink(message.content)) {
 					const fightId = getFightId(message.content);
 					const fightUrl = createUrl(fightId);
 					if ( !fightUrls.includes(fightUrl) ) {
@@ -224,6 +245,7 @@ getGlobalChart = (message) => {
 				const sortedLogs = data.sort((a,b) => (a.end > b.end) ? 1 : ((b.end > a.end) ? -1 : 0));
 
 				let fights = [];
+
 				sortedLogs.forEach( (currentLog) => {
 					currentLog.fights.forEach( (fight) => {
 						fights.push(fight);
@@ -251,7 +273,7 @@ isFflogsLink = (link) => {
 }
 
 getFightId = (url) => {
-	return url.split('https://www.fflogs.com/reports/')[1].split('#')[0];
+	return url.split('https://www.fflogs.com/reports/')[1];
 }
 
 createUrl = (fightId) => {
@@ -275,6 +297,14 @@ getBarColor = (fight) => {
 			return fight.lastPhaseIsIntermission ? colors.p4 : colors.p3;
 		case 4:
 			return colors.p4;
+		case 5:
+			return colors.p5;
+		case 6:
+			return colors.p6;
+		case 7:
+			return colors.p7;
+		default:
+			return '#eee';
 	}
 }
 
