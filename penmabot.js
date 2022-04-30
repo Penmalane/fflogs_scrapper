@@ -206,6 +206,9 @@ createChart = (fights, scaled = false) => {
 						   stepSize: 1
 						}
 					 }]
+				},
+				plugins: {
+					legend: false
 				}
 			}
 		}
