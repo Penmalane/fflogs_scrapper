@@ -359,10 +359,7 @@ handleSlut = async (message) => {
 				hasBeenInserted = true;
 			}
 			
-			let sentMessage = `You are ${slutPercentage}% a slut\n\n`;
-			user && user.slutRetry && !hasBeenInserted ? 
-				sentMessage += `You have ${user.slutRetry} retries remaining for today.\nType ${slutRetryTrigger} to retry!` :
-				sentMessage += noRetryMessage;
+			const sentMessage = `You are ${slutPercentage}% a slut\n`;
 			message.channel.send(sentMessage);
 		}
 }
