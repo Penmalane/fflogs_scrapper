@@ -224,42 +224,50 @@ createChart = (fights, scaled = false) => {
 
 getGlobalChart = (message) => {
 	guilds[message.guild.id].messages.fetch()
-		.then( (messages) => {			
+		.then( (messages) => {
 			let fightUrls = [];
 
 			messages.forEach( (message) => {
 				if (message && message.content && isFflogsLink(message.content)) {
-					const fightId = getFightId(message.content);
-					const fightUrl = createUrl(fightId);
-					if ( !fightUrls.includes(fightUrl) ) {
-						fightUrls.push(fightUrl);
+					const content = message.content.split(' ')[0];
+					if (content.includes('http')) {
+						const fightId = getFightId(content);
+						let fightUrl = createUrl(fightId);
+						if ( !fightUrls.includes(fightUrl) ) {
+							fightUrls.push(fightUrl);
+						}
 					}
 				}
 			});
 
 			const fetchPromises = fightUrls.map( (fightUrl) => fetch(fightUrl));
 
-			Promise.all(fetchPromises
-				).then(function (responses) {
-				return Promise.all(responses.map(function (response) {
-					return response.json();
-				}));
-			}).then(function (data) {
-				const sortedLogs = data.sort((a,b) => (a.end > b.end) ? 1 : ((b.end > a.end) ? -1 : 0));
+			Promise.all(fetchPromises)
+				.then(function (responses) {
+					return Promise.all(responses.map(function (response) {
+						return response.json();
+					}));
+				}).then(function (data) {
+					const sortedLogs = data.sort((a,b) => (a.end > b.end) ? 1 : ((b.end > a.end) ? -1 : 0));
 
-				let fights = [];
+					let fights = [];
 
-				sortedLogs.forEach( (currentLog) => {
-					currentLog.fights.forEach( (fight) => {
-						fights.push(fight);
-					})
+					sortedLogs.forEach( (currentLog) => {
+						let maxDuration = 0;
+						let bestFight = {};
+						currentLog.fights.forEach( (fight) => {
+							if (fight.end_time - fight.start_time > maxDuration) {
+								bestFight = fight;
+							}
+						})
+						fights.push(bestFight);
+					});
+
+					message.channel.send(`Number of pulls: ${fights.length}`);
+					handleData(fights, message);
+				}).catch(function (error) {
+					console.log(error);
 				});
-
-				message.channel.send(`Number of pulls: ${fights.length}`);
-				handleData(fights, message);
-			}).catch(function (error) {
-				console.log(error);
-			});
 			
 
 			
