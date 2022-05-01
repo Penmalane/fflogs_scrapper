@@ -256,10 +256,12 @@ getGlobalChart = (message) => {
 						let maxDuration = 0;
 						let bestFight = {};
 						currentLog.fights.forEach( (fight) => {
-							if (fight.end_time - fight.start_time > maxDuration) {
+							if (fight.zoneName === "Dragonsong's Reprise (Ultimate)" && fight.end_time - fight.start_time > maxDuration) {
+								maxDuration = fight.end_time - fight.start_time;
 								bestFight = fight;
 							}
 						})
+
 						fights.push(bestFight);
 					});
 
