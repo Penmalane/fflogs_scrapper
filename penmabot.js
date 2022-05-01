@@ -29,6 +29,7 @@ fs.readFile('./bot_secret_token', 'utf8' , (err, token) => {
 
 const settings = { method: "Get" };
 const fetchTrigger = "!bonk";
+const scaledFetchTrigger = "!scaledbonk";
 const slutTrigger = "!slut";
 const rankingTrigger = '!ranking';
 const slutRetryTrigger = "!reslut";
@@ -80,6 +81,10 @@ client.on('message', (message) => {
 
 	if (message.content === fetchTrigger) {
 		getGlobalChart(message);
+	}
+
+	if (message.content === scaledFetchTrigger) {
+		getGlobalChart(message, true);
 	}
 
 	if (message.content.includes(slutTrigger)) {
@@ -222,7 +227,7 @@ createChart = (fights, scaled = false) => {
 	}
 }
 
-getGlobalChart = (message) => {
+getGlobalChart = (message, scaled = false) => {
 	guilds[message.guild.id].messages.fetch()
 		.then( (messages) => {
 			let fightUrls = [];
@@ -265,7 +270,7 @@ getGlobalChart = (message) => {
 						fights.push(bestFight);
 					});
 
-					handleData(fights, message);
+					handleData(fights, message, null, scaled);
 				}).catch(function (error) {
 					console.log(error);
 				});
