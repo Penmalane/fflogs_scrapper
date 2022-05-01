@@ -265,7 +265,6 @@ getGlobalChart = (message) => {
 						fights.push(bestFight);
 					});
 
-					message.channel.send(`Number of pulls: ${fights.length}`);
 					handleData(fights, message);
 				}).catch(function (error) {
 					console.log(error);
