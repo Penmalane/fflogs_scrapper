@@ -367,13 +367,13 @@ insertUser = async (serverId, userId, slutPercentage) => {
 getRanking = async (message) => {
 	const users = await getOrderedUsers(message.guild.id);
 
-	let rankString = '';
-
 	if (users) {
-		await users.forEach( async (user, index) => {
+		let rankString = '';
+
+		for (const[index, user] of users.entries()) {
 			const fetchedUser = await client.users.fetch(user.userId);
 			rankString += `${index + 1}: ${fetchedUser.username} (${user.percentage}%)\n`;
-		});
+		}
 
 		const rankingEmbed = new Discord.MessageEmbed()
 			.setColor('#b983f7')
