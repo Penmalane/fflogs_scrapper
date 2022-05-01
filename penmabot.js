@@ -64,7 +64,7 @@ client.on('ready', async () => {
 	const guildInfos = client.guilds.cache;
 	
 	guildInfos.forEach( (guild) => {
-		const logChannel = guild.channels.cache.find( (channel) => channel.name === "logs");
+		const logChannel = guild.channels.cache.find( (channel) => channel.name.includes("logs"));
 		guilds[guild.id] = logChannel;
 	});
 });
