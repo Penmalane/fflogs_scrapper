@@ -102,7 +102,7 @@ client.on('message', (message) => {
 		//lowerScore(message);
 	}
 
-	if (message.content.toLowerCase().includes("dn") && message.channel.name.includes('bot')) {
+	if (message.content.toLowerCase().includes("dn") && message.channel && message.channel.name && message.channel.name.includes('bot')) {
 		message.channel.send("deez nuts lmao");
 	}
 
