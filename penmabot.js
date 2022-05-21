@@ -42,15 +42,15 @@ const slutMaxRetry = 3;
 const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
 
 const colors = {
-	p1: '#28b4c8',
+	p1: '#3288bd',
 	lc: '#ff6358',
-	p2: '#78d237',
-	p3: '#2d73f5',
-	p4: '#ffd246',
-	p5: '#ecaf81',
-	p6: '#abeaea',
-	p7: '#ead1dc',
-	kill: '#aa46be'
+	p2: '#66c2a5',
+	p3: '#abdda4',
+	p4: '#e6f598',
+	p5: '#fee08b',
+	p6: '#fdae61',
+	p7: '#f46d43',
+	kill: '#d53e4f'
 };
 
 let guilds = {};
@@ -410,9 +410,14 @@ retrySlut = async (message) => {
 		let sentMessage = `You are ${updatedUser.value.percentage}% a slut.\n`;
 		const retryString = updatedUser.value.slutRetry === 1 ? "retry" : "retries";
 
-		updatedUser.value.slutRetry ?
+		if (updatedUser.value.percentage === 69) {
+			resetRetry(message.guild.id, message.author.id);
+			sentMessage += '**69**! Your retry counter has been reset to 3.';
+		} else {
+			updatedUser.value.slutRetry ?
 			sentMessage += `You have ${updatedUser.value.slutRetry} ${retryString} remaining for today.` :
 			sentMessage += noRetryMessage;
+		}
 
 		message.channel.send(sentMessage);
 	} else {
@@ -484,6 +489,15 @@ lowerAttackerResluts = async (serverId, userId) => {
 	await slutCollection.findOneAndUpdate(
 		{ serverId, userId },
 		{ $inc : { slutRetry : -1 } }
+	);
+}
+
+resetRetry = async (serverId, userId) => {
+	const slutCollection = mongoClient.db("penmabot").collection("slut");
+
+	await slutCollection.findOneAndUpdate(
+		{ serverId, userId },
+		{ $set: {slutRetry: slutMaxRetry } }
 	);
 }
 
