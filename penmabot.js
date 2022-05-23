@@ -42,15 +42,14 @@ const slutMaxRetry = 3;
 const noRetryMessage = "You have no retry remaining. Wait for the daily reset at midnight.";
 
 const colors = {
-	p1: '#3288bd',
-	lc: '#ff6358',
-	p2: '#66c2a5',
-	p3: '#abdda4',
-	p4: '#e6f598',
-	p5: '#fee08b',
-	p6: '#fdae61',
-	p7: '#f46d43',
-	kill: '#d53e4f'
+	p1: '#28b4c8',
+	p2: '#78d237',
+	p3: '#2d73f5',
+	p4: '#ffd246',
+	p5: '#ecaf81',
+	p6: '#abeaea',
+	p7: '#ead1dc',
+	kill: '#aa46be'
 };
 
 let guilds = {};
