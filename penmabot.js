@@ -43,6 +43,7 @@ const noRetryMessage = "You have no retry remaining. Wait for the daily reset at
 
 const colors = {
 	p1: '#28b4c8',
+	intermission: '#ff6358',
 	p2: '#78d237',
 	p3: '#2d73f5',
 	p4: '#ffd246',
@@ -307,7 +308,7 @@ getBarColor = (fight) => {
 	}
 	switch(fight.lastPhaseForPercentageDisplay) {
 		case 1:
-			return fight.lastPhaseIsIntermission ? colors.lc : colors.p1;
+			return fight.lastPhaseIsIntermission ? colors.intermission : colors.p1;
 		case 2:
 			return colors.p2;
 		case 3:
