@@ -381,10 +381,19 @@ getRanking = async (message) => {
 
 	if (users) {
 		let rankString = '';
+		let ranking = 1;
+		let previousUserPercentage;
 
 		for (const[index, user] of users.entries()) {
 			const fetchedUser = await client.users.fetch(user.userId);
-			rankString += `${index + 1}: ${fetchedUser.username} (${user.percentage}%)\n`;
+
+			if (user.percentage !== previousUserPercentage) {
+				ranking = index + 1;
+			}
+
+			rankString += `${ranking}: ${fetchedUser.username} (${user.percentage}%)\n`;
+
+			previousUserPercentage = user.percentage;
 		}
 
 		const rankingEmbed = new Discord.MessageEmbed()
