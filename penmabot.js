@@ -1,10 +1,14 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const client = new Discord.Client();
 const { MessageAttachment } = require('discord.js');
 const MongoClient = require('mongodb').MongoClient;
 const cron = require('node-cron');
+
+const client = new Discord.Client({
+    partials: ["MESSAGE"],
+    ws: { intents: ["GUILD_MESSAGES"] }
+});
 
 const uri = "mongodb+srv://penma:penmalane@cluster0.naf6i.mongodb.net/penmabot?retryWrites=true&w=majority";
 const mongoClient = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
