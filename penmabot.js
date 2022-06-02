@@ -6,8 +6,7 @@ const MongoClient = require('mongodb').MongoClient;
 const cron = require('node-cron');
 
 const client = new Discord.Client({
-    partials: ["MESSAGE"],
-    ws: { intents: ["GUILD_MESSAGES"] }
+    ws: { intents: ["GUILDS", "GUILD_MESSAGES"] }
 });
 
 const uri = "mongodb+srv://penma:penmalane@cluster0.naf6i.mongodb.net/penmabot?retryWrites=true&w=majority";
