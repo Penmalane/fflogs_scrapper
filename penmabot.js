@@ -58,7 +58,7 @@ const colors = {
 
 let guilds = {};
 
-client.on('ready', async () => {
+/*client.on('ready', async () => {
 	console.log("Connected as " + client.user.tag);
 	
 	await mongoClient.connect();
@@ -70,7 +70,7 @@ client.on('ready', async () => {
 		const logChannel = guild.channels.cache.find( (channel) => channel.name.includes("logs"));
 		guilds[guild.id] = logChannel;
 	});
-});
+});*/
 
 client.on('message', (message) => {
 	try {
@@ -79,11 +79,11 @@ client.on('message', (message) => {
 		}
 	
 		if (message.content === fetchTrigger) {
-			getGlobalChart(message);
+			//getGlobalChart(message);
 		}
 	
 		if (message.content === scaledFetchTrigger) {
-			getGlobalChart(message, true);
+			//getGlobalChart(message, true);
 		}
 	
 		if (message.content.includes(slutTrigger)) {
