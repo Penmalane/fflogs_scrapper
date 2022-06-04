@@ -73,53 +73,52 @@ client.on('ready', async () => {
 });
 
 client.on('message', (message) => {
-	if (message.author == client.user) {
-		return;
-	}
-
-	// if(isFflogsLink(message) && isInLogsChannel(message)) {
-	/*if(isFflogsLink(message.content) && !message.content.includes(chartTrigger)) {
-		getFflogsData(message, message.content)
-	} */
-
-	if (message.content === fetchTrigger) {
-		getGlobalChart(message);
-	}
-
-	if (message.content === scaledFetchTrigger) {
-		getGlobalChart(message, true);
-	}
-
-	if (message.content.includes(slutTrigger)) {
-		handleSlut(message);
-	}
-
-	if (message.content === rankingTrigger) {
-		getRanking(message);
-	}
-
-	if (message.content === slutRetryTrigger) {
-		retrySlut(message);
-	}
-
-	if (message.content.includes(questionTrigger)) {
-		question(message);
-	}
-
-	if (message.content.includes(lowerTrigger)) {
-		//lowerScore(message);
-	}
-
-	if (message.content.toLowerCase().includes("dn") && message.channel && message.channel.name && message.channel.name.includes('bot')) {
-		message.channel.send("deez nuts lmao");
-	}
-
-	if(message.content.includes(chartTrigger)) {
-		handleIndividualChart(message);
-	}
-
-	if(message.content.includes(scaledChartTrigger)) {
-		handleIndividualChart(message, true);
+	try {
+		if (message.author == client.user) {
+			return;
+		}
+	
+		if (message.content === fetchTrigger) {
+			getGlobalChart(message);
+		}
+	
+		if (message.content === scaledFetchTrigger) {
+			getGlobalChart(message, true);
+		}
+	
+		if (message.content.includes(slutTrigger)) {
+			handleSlut(message);
+		}
+	
+		if (message.content === rankingTrigger) {
+			getRanking(message);
+		}
+	
+		if (message.content === slutRetryTrigger) {
+			retrySlut(message);
+		}
+	
+		if (message.content.includes(questionTrigger)) {
+			question(message);
+		}
+	
+		if (message.content.includes(lowerTrigger)) {
+			//lowerScore(message);
+		}
+	
+		if (message.content.toLowerCase().includes("dn") && message.channel && message.channel.name && message.channel.name.includes('bot')) {
+			message.channel.send("deez nuts lmao");
+		}
+	
+		if(message.content.includes(chartTrigger)) {
+			handleIndividualChart(message);
+		}
+	
+		if(message.content.includes(scaledChartTrigger)) {
+			handleIndividualChart(message, true);
+		}
+	} catch (error) {
+		console.error(errror);
 	}
 })
 
@@ -153,7 +152,7 @@ handleIndividualChart = (message, scaled = false) => {
 			}
 		}
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 	}
 }
 
