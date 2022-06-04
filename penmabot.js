@@ -58,19 +58,21 @@ const colors = {
 
 let guilds = {};
 
-/*client.on('ready', async () => {
+client.on('ready', async () => {
 	console.log("Connected as " + client.user.tag);
 	
 	await mongoClient.connect();
 	console.log("Connected to the database");
 
+	/*
 	const guildInfos = client.guilds.cache;
 	
 	guildInfos.forEach( (guild) => {
 		const logChannel = guild.channels.cache.find( (channel) => channel.name.includes("logs"));
 		guilds[guild.id] = logChannel;
 	});
-});*/
+	*/
+});
 
 client.on('message', (message) => {
 	try {
