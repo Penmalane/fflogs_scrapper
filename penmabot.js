@@ -81,11 +81,11 @@ client.on('message', (message) => {
 		}
 	
 		if (message.content === fetchTrigger) {
-			//getGlobalChart(message);
+			getGlobalChart(message);
 		}
 	
 		if (message.content === scaledFetchTrigger) {
-			//getGlobalChart(message, true);
+			getGlobalChart(message, true);
 		}
 	
 		if (message.content.includes(slutTrigger)) {
@@ -261,6 +261,9 @@ getGlobalChart = (message, scaled = false) => {
 						const sortedLogs = data.sort((a,b) => (a.end > b.end) ? 1 : ((b.end > a.end) ? -1 : 0));
 	
 						let fights = [];
+
+						const totalPulls = sortedLogs.find((log) => log.zoneName === "Dragonsong's Reprise (Ultimate)");
+						message.channel.send(`Total number of pulls: ${totalPulls}`);
 	
 						sortedLogs.forEach( (currentLog) => {
 							let maxDuration = 0;
