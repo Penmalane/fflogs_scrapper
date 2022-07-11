@@ -261,23 +261,26 @@ getGlobalChart = (message, scaled = false) => {
 						const sortedLogs = data.sort((a,b) => (a.end > b.end) ? 1 : ((b.end > a.end) ? -1 : 0));
 	
 						let fights = [];
-
-						const totalPulls = sortedLogs.find((log) => log.zoneName === "Dragonsong's Reprise (Ultimate)").length;
-						message.channel.send(`Total number of pulls: ${totalPulls}`);
+						let totalPulls = 0;
 	
 						sortedLogs.forEach( (currentLog) => {
 							let maxDuration = 0;
 							let bestFight = {};
 							currentLog.fights.forEach( (fight) => {
-								if (fight.zoneName === "Dragonsong's Reprise (Ultimate)" && fight.end_time - fight.start_time > maxDuration) {
-									maxDuration = fight.end_time - fight.start_time;
-									bestFight = fight;
+								if (fight.zoneName === "Dragonsong's Reprise (Ultimate)") {
+									totalPulls++;
+
+									if (fight.end_time - fight.start_time > maxDuration) {
+										maxDuration = fight.end_time - fight.start_time;
+										bestFight = fight;
+									}
 								}
 							})
 	
 							fights.push(bestFight);
 						});
 	
+						message.channel.send(`Total number of pulls: ${totalPulls}`);
 						handleData(fights, message, null, scaled);
 					}).catch(function (error) {
 						console.log(error);
