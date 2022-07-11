@@ -71,7 +71,7 @@ client.on('ready', async () => {
 		const logChannel = guild.channels.cache.find( (channel) => channel.name.includes("logs"));
 		guilds[guild.id] = logChannel;
 	});
-	
+
 });
 
 client.on('message', (message) => {
@@ -262,7 +262,7 @@ getGlobalChart = (message, scaled = false) => {
 	
 						let fights = [];
 
-						const totalPulls = sortedLogs.find((log) => log.zoneName === "Dragonsong's Reprise (Ultimate)");
+						const totalPulls = sortedLogs.find((log) => log.zoneName === "Dragonsong's Reprise (Ultimate)").length;
 						message.channel.send(`Total number of pulls: ${totalPulls}`);
 	
 						sortedLogs.forEach( (currentLog) => {
