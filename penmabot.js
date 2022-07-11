@@ -64,14 +64,14 @@ client.on('ready', async () => {
 	await mongoClient.connect();
 	console.log("Connected to the database");
 
-	/*
+	
 	const guildInfos = client.guilds.cache;
 	
 	guildInfos.forEach( (guild) => {
 		const logChannel = guild.channels.cache.find( (channel) => channel.name.includes("logs"));
 		guilds[guild.id] = logChannel;
 	});
-	*/
+	
 });
 
 client.on('message', (message) => {
